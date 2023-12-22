@@ -1,0 +1,9 @@
+name: RS3_CustomAdvancementsPlugin
+version: '${project.version}'
+main: me.darthbeatle.rs3_customadvancementsplugin.RS3_CustomAdvancementsPlugin
+api-version: '1.20'
+prefix: RS3_CustomAdvs
+authors: [DarthBeatle]
+description: Custom Advancements for the Realms Season 3 Server
+depend:
+  - UltimateAdvancementAPI
