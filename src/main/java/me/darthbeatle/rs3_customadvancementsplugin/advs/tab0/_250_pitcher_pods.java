@@ -137,3 +137,5 @@ public class _250_pitcher_pods extends BaseAdvancement implements HiddenVisibili
   }
 
 }
+//TODO: Each advancement using a repeating task can be simplified - 1 function in separate class that takes ItemStack and Amount, then call that function when needed
+//TODO: run one repeating task for all advancements needing one - see if this is a good solution
