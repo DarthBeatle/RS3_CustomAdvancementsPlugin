@@ -17,3 +17,14 @@ public class Walking_on_sunshine extends BaseAdvancement  {
     super(KEY.getKey(), new AdvancementDisplay(Material.LEATHER_BOOTS, "Walking on Sunshine", AdvancementFrameType.TASK, true, true, x, y , "Walk 100 blocks"), parent, 1);
   }
 }
+
+// TODO - statistic for WALK_ONE_CM, RUN_ONE_CM and CROUCH_ONE_CM
+// TODO - Use PlayerMoveEvent
+
+/*
+    registerEvent(PlayerMoveEvent.class, e -> {
+      Player p = e.getPlayer();
+      int walkingStatistic = p.getStatistic(Statistic.WALK_ONE_CM);
+      p.sendMessage("You have walked: " + walkingStatistic + " blocks");
+    });
+ */

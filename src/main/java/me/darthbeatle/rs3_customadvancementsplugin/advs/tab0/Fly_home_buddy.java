@@ -22,8 +22,8 @@ public class Fly_home_buddy extends BaseAdvancement implements HiddenVisibility 
 
   public static AdvancementKey KEY = new AdvancementKey(AdvancementTabNamespaces.tab0_NAMESPACE, "fly_home_buddy");
 
-  // End Home Portal Coordinates: 0, 63, 0 - central point
-  final Location CENTRAL_POINT = new Location(Bukkit.getServer().getWorld("world_the_end"), 0, 63, 0);
+  // Center of main end island portal coordinates: 0, 63, 0
+  final Location MAIN_END_ISLAND_PORTAL = new Location(Bukkit.getServer().getWorld("world_the_end"), 0, 63, 0);
 
   public Fly_home_buddy(Advancement parent, float x, float y) {
     super(KEY.getKey(), new AdvancementDisplay(Material.ELYTRA, "Fly Home Buddy", AdvancementFrameType.CHALLENGE, true, true, x, y , "Travel from an outer end island to the main end island using an elytra"), parent, 1);
@@ -35,36 +35,21 @@ public class Fly_home_buddy extends BaseAdvancement implements HiddenVisibility 
       Player p = e.getPlayer();
       UUID pUUID = p.getUniqueId();
 
-      // stop if player has advancement, is not in the end, or is not gliding
+      // Stop if the player has the advancement, is not in the end, or is not gliding
       if (isGranted(pUUID) || !p.getWorld().getName().equalsIgnoreCase("world_the_end") || !p.isGliding()) {
 
-        if (flyingPlayers.contains(pUUID)) {
+          if (!flyingPlayers.contains(pUUID)) return;
 
           flyingPlayers.remove(pUUID);
           return;
 
-        }
-
-        return;
-
       }
 
-      // if player is far enough away and is not in hashmap, put in hashmap
-      if (playerIsWithinOuterRadius(p) && !flyingPlayers.contains(pUUID)) {
+      // If the player is far enough away and is not in the list, put in list
+      if (playerIsAtOuterEndIslands(p) && !flyingPlayers.contains(pUUID)) flyingPlayers.add(pUUID);
 
-        flyingPlayers.add(pUUID);
-
-      }
-
-      // Remove the player from hashmap if they are too far away. No sense keeping them in there
-      if (playerIsBeyondOuterRadius(p)) {
-
-        flyingPlayers.remove(pUUID);
-
-      }
-
-      // Award player advancement if they are in the hashmap, and they are near the main end island
-      if (playerIsWithinInnerRadius(p) && flyingPlayers.contains(pUUID)) {
+      // Award the player the advancement if they are in the list, and they are near the main end island
+      if (playerIsNearMainEndIsland(p) && flyingPlayers.contains(pUUID)) {
 
         incrementProgression(p);
         flyingPlayers.remove(pUUID);
@@ -73,7 +58,7 @@ public class Fly_home_buddy extends BaseAdvancement implements HiddenVisibility 
 
     });
 
-    // Clear hashmap when no one is online
+    // Clear the list when no one is online
     registerEvent(PlayerQuitEvent.class, (e) -> {
 
       if (Bukkit.getServer().getOnlinePlayers().isEmpty()) flyingPlayers.clear();
@@ -82,42 +67,30 @@ public class Fly_home_buddy extends BaseAdvancement implements HiddenVisibility 
 
   }
 
-  // Used to detect when the player is near the outer end islands
-  private boolean playerIsWithinOuterRadius(Player p) {
+  // Used to detect when the player is at the outer end islands
+  private boolean playerIsAtOuterEndIslands(Player p) {
 
     Location pLocation = p.getLocation();
 
-    // Sets player y coordinate to CENTRAL_POINT y coordinate in order to get the distance only using the x and z coordinates
+    // Sets the player y coordinate to a fixed y coordinate in order to get the distance only using the x and z coordinates
     // If y was counted, the player could fly straight up over the main end island and then back down to get the advancement
 
-    Location pLocationWithFixedY = new Location(p.getWorld(), pLocation.getX(), CENTRAL_POINT.getY(), pLocation.getZ());
+    Location pLocationWithFixedY = new Location(p.getWorld(), pLocation.getX(), MAIN_END_ISLAND_PORTAL.getY(), pLocation.getZ());
 
-    int minimumRange = 1000;
-    int maximumRange = 2000;
+    // The outer end islands start around 1000 blocks away from the main end island
+    int distanceToEndIslands = 1000;
 
-    // return true if player distance to Central Point is in between (1000 and 1500 or -1000 and -1500) on the (x or z coordinates)
-    return pLocationWithFixedY.distance(CENTRAL_POINT) > minimumRange && pLocationWithFixedY.distance(CENTRAL_POINT) < maximumRange;
+    // Return true if the player's distance to the given location is greater than the given range
+    return pLocationWithFixedY.distance(MAIN_END_ISLAND_PORTAL) > distanceToEndIslands;
 
   }
 
-  // Used to detect when the player is further out in the outer end islands
-  private boolean playerIsBeyondOuterRadius(Player p) {
+  // Used to detect when the player is a short distance away and within sight of the main end island
+  private boolean playerIsNearMainEndIsland(Player p) {
 
     Location pLocation = p.getLocation();
-
-    // Setting player y level to a constant value for same reason as in #playerIsWithingOuterRadius
-    Location pLocationWithFixedY = new Location(p.getWorld(), pLocation.getX(), CENTRAL_POINT.getY(), pLocation.getZ());
-
-    int distance = 2000;
-
-    return (!playerIsWithinOuterRadius(p) && pLocationWithFixedY.distance(CENTRAL_POINT) > distance || pLocationWithFixedY.distance(CENTRAL_POINT) < -distance);
-  }
-
-  // Used to detect when the player is near the main end island.
-  private boolean playerIsWithinInnerRadius(Player p) {
-
-    Location pLocation = p.getLocation();
-    return (pLocation.distance(CENTRAL_POINT) < 250);
+    int distanceToMainEndIsland = 250;
+    return (pLocation.distance(MAIN_END_ISLAND_PORTAL) < distanceToMainEndIsland);
 
   }
 }
